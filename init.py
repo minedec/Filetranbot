@@ -3,6 +3,7 @@
 """
 from wxpy import *
 import wrshell
+import broadcast
 
 global bot
 bot = Bot(cache_path=True)
@@ -11,7 +12,7 @@ wrshell.set_bot(bot)
 
 
 @bot.register(None, TEXT, except_self=False)
-def filehelper_shell(msg):
+def file_helper_shell(msg):
     print(msg)
     if msg.receiver != bot.file_helper:
         return
@@ -24,6 +25,16 @@ def friend_reply(msg):
         return
     return
 
+
+@bot.register(Group, TEXT)
+def group_reply(msg):
+    if msg.receiver.puid not in wrshell.contact_group_list.keys():
+        return
+    return
+
+
+broadcast.set_bot(bot)
+broadcast.broadcast_minus()
 embed()
 #bot.join()
 

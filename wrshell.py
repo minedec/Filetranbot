@@ -62,16 +62,6 @@ def set_bot(new_bot):
     bot = new_bot
 
 
-def get_contact_friend():
-    global contact_friend_list
-    return contact_friend_list
-
-
-def get_contact_group():
-    global contact_group_list
-    return contact_group_list
-
-
 def inner_func(command):
     """
     判断是否是内置命令，内置命令以wr开头
