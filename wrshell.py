@@ -32,6 +32,18 @@
     -添加图片到图片缓存中，使用者可以发出相关指令查询图片缓存中的图片
     -输入添加图片命令后，5分钟内发往文件助手的图片都存入图片缓存中
 
+添加好友或群组到广播列表中
+    wr addb <friend_name or group_name>
+    -添加好友或群组到广播列表中，每天收到广播
+
+删除广播列表中好友或群组
+    wr rmb <friend_name or group_name>
+    -将好友或群组从广播列表中移除
+
+显示广播列表中的好友或群组
+    wr lb
+    - 显示活动列表中好友或群组
+
 显示帮助
     wr h
 """
@@ -109,8 +121,7 @@ def add_friend(args=None):
     friend = constant.bot.friends().search(friend_name)[0]
     if friend is None:
         constant.bot.file_helper.send('未找到 ' + friend_name)
-    global contact_friend_list
-    contact_friend_list.update({friend.puid: friend})
+    constant.contact_friend_list.update({friend.puid: friend})
     constant.bot.file_helper.send('添加 ' + friend.name)
 
 
@@ -124,8 +135,8 @@ def remove_friend(args=None):
     friend = constant.bot.friends().search(friend_name)[0]
     if friend is None:
         constant.bot.file_helper.send('未找到 ' + friend_name)
-    if friend.puid in contact_friend_list.keys():
-        contact_friend_list.pop(friend.puid)
+    if friend.puid in constant.contact_friend_list.keys():
+        constant.contact_friend_list.pop(friend.puid)
         constant.bot.file_helper.send('已删除 ' + friend.name)
 
 
@@ -136,8 +147,8 @@ def show_friends(args=None):
     :return: 无
     """
     name_list = []
-    for i in contact_friend_list.keys():
-        name_list.append(contact_friend_list.get(i).name)
+    for i in constant.contact_friend_list.keys():
+        name_list.append(constant.contact_friend_list.get(i).name)
     if name_list:
         constant.bot.file_helper.send('\n'.join(name_list))
     else:
@@ -156,8 +167,7 @@ def add_group(args=None):
     group = constant.bot.groups().search(group_name)[0]
     if group is None:
         constant.bot.file_helper.send('未找到 ' + group_name)
-    global contact_group_list
-    contact_group_list.update({group.puid: group})
+    constant.contact_group_list.update({group.puid: group})
     constant.bot.file_helper.send('添加 ' + group.name)
 
 
@@ -171,8 +181,8 @@ def remove_group(args=None):
     group = constant.bot.friends().search(group_name)[0]
     if group is None:
         constant.bot.file_helper.send('未找到 ' + group_name)
-    if group.puid in contact_group_list.keys():
-        contact_group_list.pop(group.puid)
+    if group.puid in constant.contact_group_list.keys():
+        constant.contact_group_list.pop(group.puid)
         constant.bot.file_helper.send('已删除 ' + group.name)
 
 
@@ -183,8 +193,68 @@ def show_groups(args=None):
     :return: 无
     """
     name_list = []
-    for i in contact_group_list.keys():
-        name_list.append(contact_group_list.get(i).name)
+    for i in constant.contact_group_list.keys():
+        name_list.append(constant.contact_group_list.get(i).name)
+    if name_list:
+        constant.bot.file_helper.send('\n'.join(name_list))
+    else:
+        constant.bot.file_helper.send('列表为空')
+
+
+def add_broadcast(args=None):
+    """
+    向广播列表中添加好友群组，仅向处于广播列表中的群组提供广播
+    :param args: 命令行参数，包含名称
+    :return: 无
+    """
+    name = args[2]
+    friend = constant.bot.friends().search(name)[0]
+    if friend is not None:
+        constant.deliver_list.update({friend.puid: friend})
+        constant.bot.file_helper.send('添加 ' + friend.name)
+        return
+    constant.bot.file_helper.send('未找到好友 ' + name)
+    if not constant.bot.groups().search(name):
+        constant.bot.file_helper.send('未找到群组 ' + name)
+    group = constant.bot.groups().search(name)[0]
+    if group is None:
+        constant.bot.file_helper.send('未找到群组 ' + name)
+    constant.deliver_list.update({group.puid: group})
+    constant.bot.file_helper.send('添加 ' + group.name)
+
+
+def remove_broadcast(args=None):
+    """
+    移除广播列表中的好友群组
+    :param args: 命令行参数，包含名称
+    :return: 无
+    """
+    friend_name = args[2]
+    friend = constant.bot.friends().search(friend_name)[0]
+    if friend is None:
+        constant.bot.file_helper.send('未找到 ' + friend_name)
+    if friend.puid in constant.deliver_list.keys():
+        constant.deliver_list.pop(friend.puid)
+        constant.bot.file_helper.send('已删除 ' + friend.name)
+        return
+    group_name = args[2]
+    group = constant.bot.friends().search(group_name)[0]
+    if group is None:
+        constant.bot.file_helper.send('未找到 ' + group_name)
+    if group.puid in constant.deliver_list.keys():
+        constant.deliver_list.pop(group.puid)
+        constant.bot.file_helper.send('已删除 ' + group.name)
+
+
+def show_broadcast(args=None):
+    """
+    展示广播列表中的好友群组
+    :param args: 命令行参数
+    :return: 无
+    """
+    name_list = []
+    for i in constant.deliver_list.keys():
+        name_list.append(constant.deliver_list.get(i).name)
     if name_list:
         constant.bot.file_helper.send('\n'.join(name_list))
     else:
@@ -212,7 +282,10 @@ func_dict = {
     'lf': show_friends,
     'addg': add_group,
     'rmg': remove_group,
-    'lg': show_groups
+    'lg': show_groups,
+    'addb': add_broadcast,
+    'rmb': remove_broadcast,
+    'lb': show_broadcast
 }
 
 

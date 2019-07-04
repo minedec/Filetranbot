@@ -65,31 +65,34 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
 
 
 def module_repeat(text=False, img=False, second=0, minute=0, hour=0, day=0):
-    msg = ''
+    msg = []
     imsg = []
     if text:
+        t = ''
         if time.localtime(time.time()).tm_hour < 6:
-            msg = msg + '凌晨好'
+            t = t + '凌晨好'
         elif time.localtime(time.time()).tm_hour < 8:
-            msg = msg + '早上好'
+            t = t + '早上好'
         elif time.localtime(time.time()).tm_hour < 12:
-            msg = msg + '上午好'
+            t = t + '上午好'
         elif time.localtime(time.time()).tm_hour < 13:
-            msg = msg + '中午好'
+            t = t + '中午好'
         elif time.localtime(time.time()).tm_hour < 17:
-            msg = msg + '下午好'
+            t = t + '下午好'
         elif time.localtime(time.time()).tm_hour < 18:
-            msg = msg + '傍晚好'
+            t = t + '傍晚好'
         elif time.localtime(time.time()).tm_hour < 21:
-            msg = msg + '晚上好'
+            t = t + '晚上好'
         elif time.localtime(time.time()).tm_hour < 23:
-            msg = msg + '夜晚好'
+            t = t + '夜晚好'
         else:
-            msg = msg + '夜深了'
-
+            t = t + '夜深了'
+        t = t + '，当前时间 ' + str(time.localtime(time.time()).tm_hour) + '点' + str(time.localtime(time.time()).tm_min)\
+                + '分'
+        msg.append(t)
         w = pyweathercn.Weather('哈尔滨')
-        msg = msg + ', 今天天气 ' + w.today() + ' ' + w.tomorrow() + '\n' + w.tip()
-        msg = [msg]
+        msg.append('今天天气 ' + w.today() + ' ' + w.tomorrow())
+        msg.append(w.tip())
 
     if img:
         img_list = get_all_img_name('img/')
