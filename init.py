@@ -5,6 +5,7 @@ from wxpy import *
 import wrshell
 import broadcast
 import constant
+import auto_reply
 import time
 import os
 
@@ -13,7 +14,7 @@ bot.enable_puid()
 constant.bot = bot
 
 
-@bot.register(None, TEXT, except_self=False)
+@bot.register(bot.file_helper, TEXT, except_self=False)
 def file_helper_shell(msg):
     print(msg)
     if msg.receiver != bot.file_helper:
@@ -23,23 +24,20 @@ def file_helper_shell(msg):
 
 @bot.register(Friend, TEXT)
 def friend_reply(msg):
-    if msg.receiver.puid not in constant.contact_friend_list.keys():
+    print(msg)
+    if msg.sender.puid not in constant.contact_friend_list.keys():
         return
-    return
+    return auto_reply.auto_reply(msg)
 
 
 @bot.register(Group, TEXT)
 def group_reply(msg):
-    if msg.receiver.puid not in constant.contact_group_list.keys():
+    if msg.sender.puid not in constant.contact_group_list.keys():
         return
-    return
+    if not msg.is_at:
+        return
+    return auto_reply.auto_reply(msg)
 
-
-#constant.deliver_list.update({bot.file_helper.puid: bot.file_helper})
-#broadcast.module_repeat(True, True, 10)
-
-constant.deliver_list.update({bot.file_helper.puid: bot.file_helper})
-broadcast.module_broadcast(True, True, 20)
 
 embed()
 #bot.join()

@@ -30,9 +30,15 @@ class Broadcast:
     def send_broadcast(self):
         for value in constant.deliver_list.values():
             value.send('\n'.join(self.__text))
-            #for img_path in self.__img:
-               # print(img_path)
-               #value.send_image('%s' % img_path)
+
+            # 如果图片体积太大，可能会发送失败
+            # 所以这里缺少减小图片体积处理
+            # TODO 减小图片体积
+            for img_path in self.__img:
+                try:
+                    value.send_image('%s' % img_path)
+                except Exception:
+                    continue
 
 
 def start_repeat(broadcast=None, second=0, minute=0, hour=0, day=0):
@@ -99,8 +105,11 @@ def module_repeat(text=False, img=False, second=0, minute=0, hour=0, day=0):
         imsg.append(random.choice(img_list))
 
     Broadcast(msg, imsg).send_broadcast()
-    threading.Timer(second + minute * 60 + hour * 3600 + day * 86400, module_repeat,
-                    [text, img, second, minute, hour, day]).start()
+    if isRepeat:
+        threading.Timer(
+            second + minute * 60 + hour * 3600 + day * 86400, module_repeat,
+            [text, img, second, minute, hour, day]
+        ).start()
 
 
 def broadcast_minus():

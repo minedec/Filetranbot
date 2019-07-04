@@ -44,6 +44,12 @@
     wr lb
     - 显示活动列表中好友或群组
 
+开始广播，指定间隔秒，分，时，天，空格分开，可以选择填写
+    wr onb <second> <minute> <hour> <day>
+
+关闭广播
+    wr offb
+
 显示帮助
     wr h
 """
@@ -51,6 +57,7 @@ from wxpy import *
 from threading import Thread
 import time
 import constant
+import broadcast
 
 
 def inner_func(command):
@@ -208,19 +215,24 @@ def add_broadcast(args=None):
     :return: 无
     """
     name = args[2]
-    friend = constant.bot.friends().search(name)[0]
-    if friend is not None:
-        constant.deliver_list.update({friend.puid: friend})
-        constant.bot.file_helper.send('添加 ' + friend.name)
+    if name == 'file_helper':
+        constant.deliver_list.update({constant.bot.file_helper.puid: constant.bot.file_helper})
+        constant.bot.file_helper.send('添加 文件传输助手')
         return
+    if constant.bot.friends().search(name):
+        friend = constant.bot.friends().search(name)[0]
+        if friend is not None:
+            constant.deliver_list.update({friend.puid: friend})
+            constant.bot.file_helper.send('添加 ' + friend.name)
+            return
     constant.bot.file_helper.send('未找到好友 ' + name)
-    if not constant.bot.groups().search(name):
-        constant.bot.file_helper.send('未找到群组 ' + name)
-    group = constant.bot.groups().search(name)[0]
-    if group is None:
-        constant.bot.file_helper.send('未找到群组 ' + name)
-    constant.deliver_list.update({group.puid: group})
-    constant.bot.file_helper.send('添加 ' + group.name)
+    if constant.bot.groups().search(name):
+        group = constant.bot.groups().search(name)[0]
+        if group is not None:
+            constant.deliver_list.update({group.puid: group})
+            constant.bot.file_helper.send('添加 ' + group.name)
+            return
+    constant.bot.file_helper.send('未找到群组 ' + name)
 
 
 def remove_broadcast(args=None):
@@ -261,16 +273,55 @@ def show_broadcast(args=None):
         constant.bot.file_helper.send('列表为空')
 
 
+def turn_on_broadcast(args=None):
+    if len(args) == 2:
+        constant.bot.file_helper.send('设置失败，间隔不能为空')
+        return
+
+    second = 0
+    minute = 0
+    hour = 0
+    day = 0
+
+    if len(args) == 3:
+        second = int(args[2])
+    elif len(args) == 4:
+        second = int(args[2])
+        minute = int(args[3])
+    elif len(args) <= 5:
+        second = int(args[2])
+        minute = int(args[3])
+        hour = int(args[4])
+    elif len(args) <= 6:
+        second = int(args[2])
+        minute = int(args[3])
+        hour = int(args[4])
+        day = int(args[5])
+
+    constant.isRepeat = True
+    constant.bot.file_helper.send('广播已开启，广播对象为')
+    show_broadcast()
+    broadcast.module_broadcast(True, True, second, minute, hour, day)
+
+
+def turn_off_broadcast(args=None):
+    constant.bot.file_helper.send('广播已关闭')
+    broadcast.stop_repeat()
+
+
 def show_help(args=None):
     """
     显示帮助
     :param args: 命令行参数
     :return:
     """
-    help_info = 'wr <option> <**args> \n   -addf <friend_name> 添加好友 \n'\
-                '   -rmf <friend_name> 删除好友 \n   -lf 显示名单好友 \n'\
-                '   -addg <group_name> 添加群组 \n   -rmg 删除群组\n'\
-                '   -lg 显示名单群组\n   -addimg 添加图片缓存\n   -h 显示帮助'
+    help_info = 'wr <option> <**args> \n   addf <friend_name> 添加好友 \n'\
+                '   rmf <friend_name> 删除好友 \n   lf 显示名单好友 \n'\
+                '   addg <group_name> 添加群组 \n   rmg 删除群组\n'\
+                '   lg 显示名单群组\n   addimg 添加图片缓存\n   h 显示帮助\n'\
+                '   addb <friend_name | group_name> 添加广播对象\n   rmb <friend_name | group_name> 移除广播对象\n'\
+                '   lb 显示广播列表\n   onb <second> <minute> <hour> <day> 开启广播，设置间隔\n'\
+                '   offb 关闭广播\n'
     constant.bot.file_helper.send(help_info)
 
 
@@ -285,7 +336,9 @@ func_dict = {
     'lg': show_groups,
     'addb': add_broadcast,
     'rmb': remove_broadcast,
-    'lb': show_broadcast
+    'lb': show_broadcast,
+    'onb': turn_on_broadcast,
+    'offb': turn_off_broadcast
 }
 
 
@@ -298,6 +351,7 @@ def execute_func(args):
     func = func_dict[args[1]]
     if func is None:
         return
+    print(args)
     func(args)
 
 
