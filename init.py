@@ -4,11 +4,13 @@
 from wxpy import *
 import wrshell
 import broadcast
+import constant
+import time
+import os
 
-global bot
 bot = Bot(cache_path=True)
 bot.enable_puid()
-wrshell.set_bot(bot)
+constant.bot = bot
 
 
 @bot.register(None, TEXT, except_self=False)
@@ -21,20 +23,24 @@ def file_helper_shell(msg):
 
 @bot.register(Friend, TEXT)
 def friend_reply(msg):
-    if msg.receiver.puid not in wrshell.contact_friend_list.keys():
+    if msg.receiver.puid not in constant.contact_friend_list.keys():
         return
     return
 
 
 @bot.register(Group, TEXT)
 def group_reply(msg):
-    if msg.receiver.puid not in wrshell.contact_group_list.keys():
+    if msg.receiver.puid not in constant.contact_group_list.keys():
         return
     return
 
 
-broadcast.set_bot(bot)
-broadcast.broadcast_minus()
+#constant.deliver_list.update({bot.file_helper.puid: bot.file_helper})
+#broadcast.module_repeat(True, True, 10)
+
+constant.deliver_list.update({bot.file_helper.puid: bot.file_helper})
+broadcast.module_broadcast(True, True, 20)
+
 embed()
 #bot.join()
 
