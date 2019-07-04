@@ -111,6 +111,7 @@ def receive_cache():
             return
         if msg.receiver != constant.bot.file_helper:
             return
+        # TODO 添加检测文件夹是否存在
         msg.get_file(constant.img_path + msg.file_name)
         constant.bot.file_helper.send('收到图片：' + msg.file_name)
 
