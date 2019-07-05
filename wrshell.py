@@ -44,6 +44,9 @@
     wr lb
     - 显示活动列表中好友或群组
 
+设置广播开始时间
+    wr bst <year> <month> <day> <hour> <minute> <second>
+
 开始广播，指定间隔秒，分，时，天，空格分开，可以选择填写
     wr onb <second> <minute> <hour> <day>
 
@@ -58,6 +61,7 @@ from threading import Thread
 import time
 import constant
 import broadcast
+import os
 
 
 def inner_func(command):
@@ -111,7 +115,9 @@ def receive_cache():
             return
         if msg.receiver != constant.bot.file_helper:
             return
-        # TODO 添加检测文件夹是否存在
+        # 检测文件夹是否存在
+        if not os.path.exists('img'):
+            os.makedirs('img')
         msg.get_file(constant.img_path + msg.file_name)
         constant.bot.file_helper.send('收到图片：' + msg.file_name)
 
@@ -274,6 +280,47 @@ def show_broadcast(args=None):
         constant.bot.file_helper.send('列表为空')
 
 
+def set_broadcast_start_time(args=None):
+    if len(args) == 2:
+        constant.bot.file_helper.send('设置失败，间隔不能为空')
+        return
+    year = 0
+    month = 0
+    day = 0
+    hour = 0
+    minute = 0
+    second = 0
+    try:
+        if len(args) <= 4:
+            constant.bot.file_helper.send('必须设置年月日')
+            return
+        elif len(args) == 5:
+            year = int(args[2])
+            month = int(args[3])
+            day = int(args[4])
+        elif len(args) == 6:
+            year = int(args[2])
+            month = int(args[3])
+            day = int(args[4])
+            hour = int(args[5])
+        elif len(args) == 7:
+            year = int(args[2])
+            month = int(args[3])
+            day = int(args[4])
+            hour = int(args[5])
+            minute = int(args[6])
+        elif len(args) == 8:
+            year = int(args[2])
+            month = int(args[3])
+            day = int(args[4])
+            hour = int(args[5])
+            minute = int(args[6])
+            second = int(args[7])
+    except Exception:
+        constant.bot.file_helper.send('格式错误，请重新输入')
+    broadcast.module_set_timer(year, month, day, hour, minute, second)
+
+
 def turn_on_broadcast(args=None):
     if len(args) == 2:
         constant.bot.file_helper.send('设置失败，间隔不能为空')
@@ -322,7 +369,7 @@ def show_help(args=None):
                 '   lg 显示名单群组\n   addimg 添加图片缓存\n   h 显示帮助\n'\
                 '   addb <friend_name | group_name> 添加广播对象\n   rmb <friend_name | group_name> 移除广播对象\n'\
                 '   lb 显示广播列表\n   onb <second> <minute> <hour> <day> 开启广播，设置间隔\n'\
-                '   offb 关闭广播\n'
+                '   offb 关闭广播\n   bst <year> <month> <day> <hour> <minute> <second> 设置广播开始时间'
     constant.bot.file_helper.send(help_info)
 
 
@@ -339,7 +386,8 @@ func_dict = {
     'rmb': remove_broadcast,
     'lb': show_broadcast,
     'onb': turn_on_broadcast,
-    'offb': turn_off_broadcast
+    'offb': turn_off_broadcast,
+    'bst': set_broadcast_start_time
 }
 
 

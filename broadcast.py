@@ -10,6 +10,7 @@ import constant
 import os
 import pyweathercn
 import random
+from datetime import datetime
 
 
 global isRepeat
@@ -17,6 +18,9 @@ isRepeat = constant.isRepeat
 
 
 class Broadcast:
+    """
+    广播类，包含待发送消息和图片地址列表
+    """
     __text = []
     __img = []
 
@@ -43,7 +47,7 @@ class Broadcast:
 
 def start_repeat(broadcast=None, second=0, minute=0, hour=0, day=0):
     """
-    向广播列表中间隔发送广播
+    向广播列表中间隔发送广播，广播内容相同
     :param broadcast: 广播消息，消息内容不变
     :param second: 间隔秒
     :param minute: 间隔分钟
@@ -59,15 +63,63 @@ def start_repeat(broadcast=None, second=0, minute=0, hour=0, day=0):
 
 
 def stop_repeat():
+    """
+    停止广播
+    :return:
+    """
     global isRepeat
     isRepeat = False
 
 
-def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
+global start_time
+start_time = None
+
+
+def module_set_timer(year=0, month=0, day=0, hour=0, minute=0, second=0):
+    from datetime import datetime
+    global start_time
     try:
-        threading.Thread(target=module_repeat, args=[text, img, second, minute, hour, day]).start()
+        start_time = datetime(year, month, day, hour, minute, second)
+    except Exception:
+        constant.bot.file_helper.send('广播启动时间格式错误')
+        return
+    constant.bot.file_helper.send('启动时间：' + str(start_time))
+
+
+def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
+    """
+    发送广播，包含天气、时间信息
+    :param text: 广播消息是否包含文字
+    :param img: 是否包含图片
+    :param second: 间隔秒
+    :param minute: 间隔分
+    :param hour: 间隔时
+    :param day: 间隔天
+    :return:
+    """
+    try:
+        from datetime import datetime
+        global start_time
+        if start_time is None:
+            constant.bot.file_helper.send('请设置启动时间')
+            return
+        if (start_time - datetime.now()).seconds <= 0:
+            constant.bot.file_helper.send('启动时间不应早于当前时间')
+            return
+        threading.Thread(
+            target=module_wait,
+            args=[text, img, second, minute, hour, day]
+        ).start()
     except Exception:
         constant.bot.file_helper.send('启动失败')
+
+
+def module_wait(text=False, img=False, second=0, minute=0, hour=0, day=0):
+    global start_time
+    threading.Timer(
+        (start_time - datetime.now()).seconds, module_repeat,
+        [text, img, second, minute, hour, day]
+    ).start()
 
 
 def module_repeat(text=False, img=False, second=0, minute=0, hour=0, day=0):
@@ -101,6 +153,9 @@ def module_repeat(text=False, img=False, second=0, minute=0, hour=0, day=0):
         msg.append(w.tip())
 
     if img:
+        # 检测文件夹是否存在
+        if not os.path.exists('img'):
+            os.makedirs('img')
         img_list = get_all_img_name('img/')
         imsg.append(random.choice(img_list))
 
@@ -118,6 +173,11 @@ def broadcast_minus():
 
 
 def get_all_img_name(dirpath):
+    """
+    获得指定目录下所有png，jpg格式文件路径
+    :param dirpath: 指定搜索目录
+    :return:
+    """
     postfix = ['png', 'jpg']  # 设置要保存的文件格式
     img_list = []
     for maindir, subdir, file_name_list in os.walk(dirpath):

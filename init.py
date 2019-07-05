@@ -16,6 +16,11 @@ constant.bot = bot
 
 @bot.register(bot.file_helper, TEXT, except_self=False)
 def file_helper_shell(msg):
+    """
+    接收发往文件助手的消息，判断是否为指令
+    :param msg: 发往文件助手的消息
+    :return: 无
+    """
     print(msg)
     if msg.receiver != bot.file_helper:
         return
@@ -24,6 +29,11 @@ def file_helper_shell(msg):
 
 @bot.register(Friend, TEXT)
 def friend_reply(msg):
+    """
+    接收活动列表好友消息，自动回复
+    :param msg: 好友的消息
+    :return: 无
+    """
     print(msg)
     if msg.sender.puid not in constant.contact_friend_list.keys():
         return
@@ -32,6 +42,11 @@ def friend_reply(msg):
 
 @bot.register(Group, TEXT)
 def group_reply(msg):
+    """
+    接收活动列表群组的消息，自动回复
+    :param msg: 群组消息
+    :return: 无
+    """
     if msg.sender.puid not in constant.contact_group_list.keys():
         return
     if not msg.is_at:
@@ -40,5 +55,4 @@ def group_reply(msg):
 
 
 embed()
-#bot.join()
 
