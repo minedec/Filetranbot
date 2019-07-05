@@ -397,7 +397,7 @@ def execute_func(args):
     :param args: 命令行参数
     :return: 无
     """
-    func = func_dict[args[1]]
+    func = func_dict.get(args[1])
     if func is None:
         return
     print(args)
