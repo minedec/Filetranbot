@@ -53,6 +53,7 @@ def group_reply(msg):
         return
     return auto_reply.auto_reply(msg)
 
+
 # TODO 添加对外接口，可以传入自己函数和相应指令
 embed()
 

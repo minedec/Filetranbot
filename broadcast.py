@@ -103,7 +103,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
         if start_time is None:
             constant.bot.file_helper.send('请设置启动时间')
             return
-        if (start_time - get_current_china_time()).seconds <= 0:
+        if (convert_to_utc(start_time) - convert_to_utc(datetime.now())).seconds <= 0:
             constant.bot.file_helper.send('启动时间不应早于当前时间')
             return
         threading.Thread(
@@ -117,7 +117,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
 def module_wait(text=False, img=False, second=0, minute=0, hour=0, day=0):
     global start_time
     threading.Timer(
-        (start_time - get_current_china_time()).seconds, module_repeat,
+        (convert_to_utc(start_time) - convert_to_utc(datetime.now())).seconds, module_repeat,
         [text, img, second, minute, hour, day]
     ).start()
 
@@ -199,6 +199,14 @@ def get_current_china_time():
     """
     from datetime import datetime, timedelta, timezone
     utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
-    print(utc_dt)
     cn_dt = utc_dt.astimezone(timezone(timedelta(hours=8)))
     return cn_dt
+
+
+def convert_to_utc(local_st):
+    """
+    本地时间转UTC时间（-8: 00）
+    """
+    time_struct = time.mktime(local_st.timetuple())
+    utc_st = datetime.utcfromtimestamp(time_struct)
+    return utc_st
