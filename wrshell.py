@@ -132,6 +132,9 @@ def add_friend(args=None):
     :return: 无
     """
     friend_name = args[2]
+    if not constant.bot.friends().search(friend_name):
+        constant.bot.file_helper.send('未找到 ' + friend_name)
+        return
     friend = constant.bot.friends().search(friend_name)[0]
     if friend is None:
         constant.bot.file_helper.send('未找到 ' + friend_name)
@@ -146,6 +149,9 @@ def remove_friend(args=None):
     :return: 无
     """
     friend_name = args[2]
+    if not constant.bot.friends().search(friend_name):
+        constant.bot.file_helper.send('未找到 ' + friend_name)
+        return
     friend = constant.bot.friends().search(friend_name)[0]
     if friend is None:
         constant.bot.file_helper.send('未找到 ' + friend_name)
@@ -192,12 +198,13 @@ def remove_group(args=None):
     :return: 无
     """
     group_name = args[2]
-    group = constant.bot.friends().search(group_name)[0]
-    if group is None:
-        constant.bot.file_helper.send('未找到 ' + group_name)
-    if group.puid in constant.contact_group_list.keys():
-        constant.contact_group_list.pop(group.puid)
-        constant.bot.file_helper.send('已删除 ' + group.name)
+    if constant.bot.friends().search(group_name):
+        group = constant.bot.friends().search(group_name)[0]
+        if group.puid in constant.contact_group_list.keys():
+            constant.contact_group_list.pop(group.puid)
+            constant.bot.file_helper.send('已删除 ' + group.name)
+            return
+    constant.bot.file_helper.send('未找到 ' + group_name)
 
 
 def show_groups(args=None):
@@ -249,20 +256,21 @@ def remove_broadcast(args=None):
     :return: 无
     """
     friend_name = args[2]
-    friend = constant.bot.friends().search(friend_name)[0]
-    if friend is None:
-        constant.bot.file_helper.send('未找到 ' + friend_name)
-    if friend.puid in constant.deliver_list.keys():
-        constant.deliver_list.pop(friend.puid)
-        constant.bot.file_helper.send('已删除 ' + friend.name)
-        return
+    if constant.bot.friends().search(friend_name):
+        friend = constant.bot.friends().search(friend_name)[0]
+        if friend.puid in constant.deliver_list.keys():
+            constant.deliver_list.pop(friend.puid)
+            constant.bot.file_helper.send('已删除 ' + friend.name)
+            return
+    constant.bot.file_helper.send('未找到 ' + friend_name)
     group_name = args[2]
-    group = constant.bot.friends().search(group_name)[0]
-    if group is None:
-        constant.bot.file_helper.send('未找到 ' + group_name)
-    if group.puid in constant.deliver_list.keys():
-        constant.deliver_list.pop(group.puid)
-        constant.bot.file_helper.send('已删除 ' + group.name)
+    if constant.bot.groups().search(group_name):
+        group = constant.bot.groups().search(group_name)[0]
+        if group.puid in constant.deliver_list.keys():
+            constant.deliver_list.pop(group.puid)
+            constant.bot.file_helper.send('已删除 ' + group.name)
+            return
+    constant.bot.file_helper.send('未找到 ' + group_name)
 
 
 def show_broadcast(args=None):

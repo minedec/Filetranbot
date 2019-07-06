@@ -11,6 +11,7 @@ import os
 import pyweathercn
 import random
 from datetime import datetime
+from datetime import timedelta
 
 
 global isRepeat
@@ -103,7 +104,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
         if start_time is None:
             constant.bot.file_helper.send('请设置启动时间')
             return
-        if (convert_to_utc(start_time) - convert_to_utc(datetime.now())).seconds <= 0:
+        if (start_time + timedelta(hours=-8)).__le__(convert_to_utc(datetime.now())):
             constant.bot.file_helper.send('启动时间不应早于当前时间')
             return
         threading.Thread(
@@ -117,7 +118,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
 def module_wait(text=False, img=False, second=0, minute=0, hour=0, day=0):
     global start_time
     threading.Timer(
-        (convert_to_utc(start_time) - convert_to_utc(datetime.now())).seconds, module_repeat,
+        ((start_time + timedelta(hours=-8)) - convert_to_utc(datetime.now())).seconds, module_repeat,
         [text, img, second, minute, hour, day]
     ).start()
 
@@ -127,26 +128,29 @@ def module_repeat(text=False, img=False, second=0, minute=0, hour=0, day=0):
     imsg = []
     if text:
         t = ''
-        if time.localtime(time.time()).tm_hour < 6:
+        c_hour = (datetime.utcfromtimestamp(time.time()) + timedelta(hours=8)).hour
+        if c_hour < 6:
             t = t + '凌晨好'
-        elif time.localtime(time.time()).tm_hour < 8:
+        elif c_hour < 8:
             t = t + '早上好'
-        elif time.localtime(time.time()).tm_hour < 12:
+        elif c_hour < 12:
             t = t + '上午好'
-        elif time.localtime(time.time()).tm_hour < 13:
+        elif c_hour < 13:
             t = t + '中午好'
-        elif time.localtime(time.time()).tm_hour < 17:
+        elif c_hour < 17:
             t = t + '下午好'
-        elif time.localtime(time.time()).tm_hour < 18:
+        elif c_hour < 18:
             t = t + '傍晚好'
-        elif time.localtime(time.time()).tm_hour < 21:
+        elif c_hour < 21:
             t = t + '晚上好'
-        elif time.localtime(time.time()).tm_hour < 23:
+        elif c_hour < 23:
             t = t + '夜晚好'
         else:
             t = t + '夜深了'
-        t = t + '，当前时间 ' + str(time.localtime(time.time()).tm_hour) + '点' + str(time.localtime(time.time()).tm_min)\
-                + '分'
+        t = t + '，当前时间 ' + (
+                datetime.utcfromtimestamp(time.time())
+                + timedelta(hours=8)
+        ).strftime("%Y-%m-%d %H:%M:%S")
         msg.append(t)
         w = pyweathercn.Weather('哈尔滨')
         msg.append('今天天气 ' + w.today() + ' ' + w.tomorrow())
