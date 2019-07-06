@@ -103,7 +103,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
         if start_time is None:
             constant.bot.file_helper.send('请设置启动时间')
             return
-        if (start_time - datetime.now()).seconds <= 0:
+        if (start_time - get_current_china_time()).seconds <= 0:
             constant.bot.file_helper.send('启动时间不应早于当前时间')
             return
         threading.Thread(
@@ -117,7 +117,7 @@ def module_broadcast(text=False, img=False, second=0, minute=0, hour=0, day=0):
 def module_wait(text=False, img=False, second=0, minute=0, hour=0, day=0):
     global start_time
     threading.Timer(
-        (start_time - datetime.now()).seconds, module_repeat,
+        (start_time - get_current_china_time()).seconds, module_repeat,
         [text, img, second, minute, hour, day]
     ).start()
 
@@ -190,3 +190,15 @@ def get_all_img_name(dirpath):
                 except:
                     pass  # 所以异常全部忽略即可
     return img_list
+
+
+def get_current_china_time():
+    """
+    获取当前时刻的中国时区时间
+    :return: 中国时区的datetime
+    """
+    from datetime import datetime, timedelta, timezone
+    utc_dt = datetime.utcnow().replace(tzinfo=timezone.utc)
+    print(utc_dt)
+    cn_dt = utc_dt.astimezone(timezone(timedelta(hours=8)))
+    return cn_dt

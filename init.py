@@ -9,7 +9,7 @@ import auto_reply
 import time
 import os
 
-bot = Bot(cache_path=True)
+bot = Bot(cache_path=True, console_qr=True)
 bot.enable_puid()
 constant.bot = bot
 
